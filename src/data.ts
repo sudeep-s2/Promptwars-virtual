@@ -92,3 +92,10 @@ export const indianElectionData = {
     { id: 3, name: "Rahul Verma", party: "Independent", constituency: "New Delhi", criminalCases: "None" }
   ]
 };
+
+export const validStates = [
+  "andhra pradesh", "arunachal pradesh", "assam", "bihar", "chhattisgarh", "goa", "gujarat", "haryana", 
+  "himachal pradesh", "jharkhand", "karnataka", "kerala", "madhya pradesh", "maharashtra", "manipur", 
+  "meghalaya", "mizoram", "nagaland", "odisha", "punjab", "rajasthan", "sikkim", "tamil nadu", "telangana", 
+  "tripura", "uttar pradesh", "uttarakhand", "west bengal", "delhi", "jammu and kashmir", "puducherry"
+];

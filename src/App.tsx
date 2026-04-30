@@ -1,8 +1,24 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, ChevronLeft, HelpCircle, CheckCircle2, RotateCcw, Building2, Users, Search, MessageSquare, X, Send, Sun, Moon } from 'lucide-react';
-import { indianElectionData } from './data';
+import { ChevronRight, ChevronLeft, HelpCircle, CheckCircle2, RotateCcw, Building2, Users, Search, MessageSquare, X, Send, Sun, Moon, Loader2 } from 'lucide-react';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { indianElectionData, validStates } from './data';
 import './index.css';
+
+// Initialize Gemini
+const genAI = new GoogleGenerativeAI(import.meta.env.VITE_GEMINI_API_KEY || '');
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+// Loading Component
+const LoadingSpinner = () => (
+  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '1rem' }}>
+    <Loader2 className="spin" size={24} color="var(--primary)" />
+    <style>{`
+      .spin { animation: spin 1s linear infinite; }
+      @keyframes spin { 100% { transform: rotate(360deg); } }
+    `}</style>
+  </div>
+);
 
 // Components
 const HeroSection = ({ onStart }: { onStart: () => void }) => (
@@ -14,7 +30,7 @@ const HeroSection = ({ onStart }: { onStart: () => void }) => (
       className="container"
     >
       <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2rem' }}>
-         <img src="https://upload.wikimedia.org/wikipedia/commons/1/17/Ashoka_Chakra.svg" alt="Ashoka Chakra" style={{ width: '100px', height: '100px', animation: 'spin 20s linear infinite', willChange: 'transform' }} />
+         <img src="https://upload.wikimedia.org/wikipedia/commons/1/17/Ashoka_Chakra.svg" alt="Ashoka Chakra - National Emblem Symbol" style={{ width: '100px', height: '100px', animation: 'spin 20s linear infinite', willChange: 'transform' }} />
       </div>
       <h1 style={{ fontSize: '4rem', marginBottom: '1rem' }}>
         Demystifying <span className="text-gradient" style={{ background: 'linear-gradient(135deg, #FF9933, #ffffff, #138808)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Indian Elections</span>
@@ -22,7 +38,11 @@ const HeroSection = ({ onStart }: { onStart: () => void }) => (
       <p style={{ fontSize: '1.2rem', color: 'var(--text-muted)', maxWidth: '600px', margin: '0 auto 2rem auto' }}>
         An interactive guide to understanding the world's largest democratic exercise. Learn about the process, types of elections, and your role as a voter.
       </p>
-      <button className="btn btn-primary floating" onClick={onStart}>
+      <button 
+        className="btn btn-primary floating" 
+        onClick={onStart}
+        aria-label="Start exploring the interactive election guide"
+      >
         Start Exploring <ChevronRight size={20} />
       </button>
     </motion.div>
@@ -129,6 +149,7 @@ const ProcessTimeline = () => {
                   onClick={() => setActiveStep(Math.max(0, activeStep - 1))}
                   disabled={activeStep === 0}
                   style={{ opacity: activeStep === 0 ? 0.5 : 1 }}
+                  aria-label="Go to previous step"
                 >
                   <ChevronLeft size={18} /> Previous
                 </button>
@@ -137,6 +158,7 @@ const ProcessTimeline = () => {
                   onClick={() => setActiveStep(Math.min(indianElectionData.steps.length - 1, activeStep + 1))}
                   disabled={activeStep === indianElectionData.steps.length - 1}
                   style={{ opacity: activeStep === indianElectionData.steps.length - 1 ? 0.5 : 1 }}
+                  aria-label="Go to next step"
                 >
                   Next <ChevronRight size={18} />
                 </button>
@@ -260,12 +282,6 @@ const ElectionDatesInfo = () => {
     let query = electionType === 'pm' ? '2024 Indian general election' : `${stateName} Legislative Assembly election`;
     
     if (electionType === 'state') {
-      const validStates = [
-        "andhra pradesh", "arunachal pradesh", "assam", "bihar", "chhattisgarh", "goa", "gujarat", "haryana", 
-        "himachal pradesh", "jharkhand", "karnataka", "kerala", "madhya pradesh", "maharashtra", "manipur", 
-        "meghalaya", "mizoram", "nagaland", "odisha", "punjab", "rajasthan", "sikkim", "tamil nadu", "telangana", 
-        "tripura", "uttar pradesh", "uttarakhand", "west bengal", "delhi", "jammu and kashmir", "puducherry"
-      ];
       if (!validStates.includes(stateName.toLowerCase().trim())) {
         setInfo("Invalid state name. Please enter a valid Indian state or Union Territory.");
         setLoading(false);
@@ -300,12 +316,14 @@ const ElectionDatesInfo = () => {
           <button 
             className={`btn ${electionType === 'pm' ? 'btn-primary' : 'btn-outline'}`}
             onClick={() => setElectionType('pm')}
+            aria-label="Search for PM (General) election details"
           >
             PM (General)
           </button>
           <button 
             className={`btn ${electionType === 'state' ? 'btn-primary' : 'btn-outline'}`}
             onClick={() => setElectionType('state')}
+            aria-label="Search for State Assembly election details"
           >
             State Assembly
           </button>
@@ -321,11 +339,19 @@ const ElectionDatesInfo = () => {
           />
         )}
         
-        <button className="btn btn-primary" onClick={fetchElectionDetails} disabled={loading} style={{ width: '80%', marginBottom: '1.5rem' }}>
+        <button 
+          className="btn btn-primary" 
+          onClick={fetchElectionDetails} 
+          disabled={loading} 
+          style={{ width: '80%', marginBottom: '1.5rem' }}
+          aria-label="Fetch election details from Wikipedia"
+        >
           {loading ? 'Fetching...' : 'Get Details from Wikipedia'}
         </button>
 
-        {info && (
+        {loading && <LoadingSpinner />}
+
+        {info && !loading && (
           <div style={{ padding: '1rem', background: 'var(--bg-dark)', borderRadius: '0.5rem', textAlign: 'left', lineHeight: '1.6', color: 'var(--text-light)', border: '1px solid var(--glass-border)', whiteSpace: 'pre-wrap' }}>
             {info}
           </div>
@@ -397,7 +423,13 @@ const VoterRegistrationForm = () => {
   if (!showForm) {
     return (
        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <button className="btn btn-primary" onClick={() => setShowForm(true)}>Register to Vote (Form 6)</button>
+          <button 
+            className="btn btn-primary" 
+            onClick={() => setShowForm(true)}
+            aria-label="Open new voter registration form"
+          >
+            Register to Vote (Form 6)
+          </button>
        </div>
     );
   }
@@ -427,7 +459,14 @@ const VoterRegistrationForm = () => {
               <option value="driving">Driving License</option>
             </select>
             <input required type="text" placeholder="ID Number" style={{ padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid var(--glass-border)', background: 'transparent', color: 'var(--text-light)', outline: 'none' }} />
-            <button type="submit" className="btn btn-primary" style={{ marginTop: '1rem' }}>Submit Registration</button>
+            <button 
+              type="submit" 
+              className="btn btn-primary" 
+              style={{ marginTop: '1rem' }}
+              aria-label="Submit voter registration form"
+            >
+              Submit Registration
+            </button>
           </form>
         )}
       </div>
@@ -458,7 +497,13 @@ const QueryForm = () => {
   if (!showForm) {
     return (
        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <button className="btn btn-outline" onClick={() => setShowForm(true)}>Submit a Query</button>
+          <button 
+            className="btn btn-outline" 
+            onClick={() => setShowForm(true)}
+            aria-label="Open query submission form"
+          >
+            Submit a Query
+          </button>
        </div>
     );
   }
@@ -487,51 +532,99 @@ const QueryForm = () => {
   );
 };
 
+const WikipediaModal = ({ content, onClose }: { content: string, onClose: () => void }) => (
+  <motion.div 
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', zIndex: 100, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '2rem' }}
+    onClick={onClose}
+    aria-modal="true"
+    role="dialog"
+  >
+    <motion.div 
+      initial={{ scale: 0.9 }}
+      animate={{ scale: 1 }}
+      exit={{ scale: 0.9 }}
+      className="glass-card"
+      style={{ maxWidth: '800px', width: '100%', maxHeight: '80vh', overflowY: 'auto', padding: '2rem', position: 'relative' }}
+      onClick={e => e.stopPropagation()}
+    >
+      <button 
+        onClick={onClose} 
+        style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'transparent', border: 'none', color: 'var(--text-light)', cursor: 'pointer' }}
+        aria-label="Close detailed information modal"
+      >
+        <X size={24} />
+      </button>
+      <h2 style={{ marginBottom: '1.5rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.5rem' }}>Detailed Information</h2>
+      <div style={{ lineHeight: '1.8', color: 'var(--text-light)', whiteSpace: 'pre-wrap' }}>{content}</div>
+    </motion.div>
+  </motion.div>
+);
+
+const LazyWikipediaModal = lazy(() => Promise.resolve({ default: WikipediaModal }));
+
 const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
   const [messages, setMessages] = useState([{ text: "Hi! I'm your election assistant. Ask me about EVM, VVPAT, NOTA, or ECI.", sender: 'bot', fullText: '' }]);
   const [modalContent, setModalContent] = useState('');
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!input.trim()) return;
-    const newMsg = { text: input, sender: 'user', fullText: '' };
-    setMessages(prev => [...prev, newMsg]);
-    
-    setTimeout(() => {
+    const userMsg = { text: input, sender: 'user', fullText: '' };
+    setMessages(prev => [...prev, userMsg]);
+    const currentInput = input;
+    setInput('');
+    setIsTyping(true);
+
+    try {
       let reply = "For more complex queries, please visit the official ECI website at voters.eci.gov.in or contact an election agent manually.";
-      const lower = input.toLowerCase();
+      const lower = currentInput.toLowerCase();
+      
       if (lower.includes('evm')) reply = "EVM stands for Electronic Voting Machine used for casting votes.";
       else if (lower.includes('vvpat')) reply = "VVPAT is a system that allows voters to verify that their vote was cast correctly via a paper slip.";
       else if (lower.includes('nota')) reply = "NOTA means 'None of the Above', an option to reject all candidates.";
       else if (lower.includes('eci')) reply = "ECI is the Election Commission of India, responsible for administering elections.";
       else {
-        fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(input + " election India")}&utf8=&format=json&origin=*`)
-          .then(res => res.json())
-          .then(async data => {
-            if (data.query && data.query.search && data.query.search.length > 0) {
-              const title = data.query.search[0].title;
-              const detailRes = await fetch(`https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&titles=${encodeURIComponent(title)}&format=json&origin=*`);
-              const detailData = await detailRes.json();
-              const pages = detailData.query.pages as Record<string, any>;
-              const extract = Object.values(pages)[0].extract as string;
-              if (extract) {
-                 const shortText = extract.substring(0, 80) + '...';
-                 setMessages(prev => [...prev, { text: shortText, sender: 'bot', fullText: extract }]);
-              } else {
-                 setMessages(prev => [...prev, { text: reply, sender: 'bot', fullText: '' }]);
-              }
-            } else {
-              setMessages(prev => [...prev, { text: reply, sender: 'bot', fullText: '' }]);
+        const res = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(currentInput + " election India")}&utf8=&format=json&origin=*`);
+        const data = await res.json();
+        
+        if (data.query && data.query.search && data.query.search.length > 0) {
+          const title = data.query.search[0].title;
+          const detailRes = await fetch(`https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&titles=${encodeURIComponent(title)}&format=json&origin=*`);
+          const detailData = await detailRes.json();
+          const pages = detailData.query.pages as Record<string, any>;
+          const extract = Object.values(pages)[0].extract as string;
+          
+          if (extract) {
+            try {
+              const prompt = `You are a helpful Indian Election Assistant. Summarize this Wikipedia text into a short, easy-to-read response for a voter: ${extract}`;
+              const result = await model.generateContent(prompt);
+              const summary = result.response.text();
+              setMessages(prev => [...prev, { text: summary, sender: 'bot', fullText: extract }]);
+            } catch (geminiError) {
+              const shortText = extract.substring(0, 150) + '...';
+              setMessages(prev => [...prev, { text: shortText, sender: 'bot', fullText: extract }]);
             }
-          })
-          .catch(() => setMessages(prev => [...prev, { text: reply, sender: 'bot', fullText: '' }]));
+          } else {
+            setMessages(prev => [...prev, { text: reply, sender: 'bot', fullText: '' }]);
+          }
+        } else {
+          setMessages(prev => [...prev, { text: reply, sender: 'bot', fullText: '' }]);
+        }
+        setIsTyping(false);
         return;
       }
       
       setMessages(prev => [...prev, { text: reply, sender: 'bot', fullText: '' }]);
-    }, 500);
-    setInput('');
+    } catch (error) {
+      setMessages(prev => [...prev, { text: "I'm having trouble connecting to the knowledge base. Please try again later.", sender: 'bot', fullText: '' }]);
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   return (
@@ -540,6 +633,7 @@ const Chatbot = () => {
         onClick={() => setIsOpen(true)}
         className="btn btn-primary floating"
         style={{ position: 'fixed', bottom: '2rem', right: '2rem', borderRadius: '50%', width: '60px', height: '60px', padding: 0, zIndex: 50, boxShadow: '0 4px 20px rgba(0,0,0,0.5)' }}
+        aria-label="Open election assistant chatbot"
       >
         <MessageSquare size={24} />
       </button>
@@ -552,23 +646,38 @@ const Chatbot = () => {
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
             className="glass-card"
             style={{ position: 'fixed', bottom: '6rem', right: '2rem', width: '350px', height: '450px', zIndex: 50, display: 'flex', flexDirection: 'column', padding: '0', overflow: 'hidden', boxShadow: '0 10px 40px rgba(0,0,0,0.5)' }}
+            role="complementary"
+            aria-label="Chatbot interface"
           >
             <div style={{ padding: '1rem', background: 'rgba(0,0,0,0.3)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
               <h3 style={{ margin: 0, fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <img src="https://upload.wikimedia.org/wikipedia/commons/1/17/Ashoka_Chakra.svg" alt="Logo" style={{ width: '20px', height: '20px' }} />
+                <img src="https://upload.wikimedia.org/wikipedia/commons/1/17/Ashoka_Chakra.svg" alt="" style={{ width: '20px', height: '20px' }} />
                 Assistant
               </h3>
-              <button onClick={() => setIsOpen(false)} style={{ color: 'var(--text-muted)' }}><X size={20} /></button>
+              <button 
+                onClick={() => setIsOpen(false)} 
+                style={{ color: 'var(--text-muted)' }}
+                aria-label="Close chatbot"
+              >
+                <X size={20} />
+              </button>
             </div>
             <div style={{ flex: 1, overflowY: 'auto', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {messages.map((m, i) => (
                 <div key={i} style={{ alignSelf: m.sender === 'user' ? 'flex-end' : 'flex-start', background: m.sender === 'user' ? 'var(--primary)' : 'rgba(255,255,255,0.1)', padding: '0.75rem 1rem', borderRadius: '1rem', borderBottomRightRadius: m.sender === 'user' ? '0' : '1rem', borderBottomLeftRadius: m.sender === 'bot' ? '0' : '1rem', maxWidth: '85%', lineHeight: '1.4' }}>
                   {m.text}
                   {m.fullText && (
-                    <button onClick={() => setModalContent(m.fullText)} style={{ display: 'block', marginTop: '0.5rem', color: '#60a5fa', background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '0.9rem', textDecoration: 'underline', padding: 0 }}>More details</button>
+                    <button 
+                      onClick={() => setModalContent(m.fullText)} 
+                      style={{ display: 'block', marginTop: '0.5rem', color: '#60a5fa', background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '0.9rem', textDecoration: 'underline', padding: 0 }}
+                      aria-label="View more details on this topic"
+                    >
+                      More details
+                    </button>
                   )}
                 </div>
               ))}
+              {isTyping && <div style={{ alignSelf: 'flex-start', background: 'rgba(255,255,255,0.1)', padding: '0.75rem 1rem', borderRadius: '1rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>Assistant is typing...</div>}
             </div>
             <div style={{ padding: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)', display: 'flex', gap: '0.5rem', background: 'rgba(0,0,0,0.2)' }}>
               <input 
@@ -578,37 +687,26 @@ const Chatbot = () => {
                 onKeyDown={e => e.key === 'Enter' && handleSend()}
                 placeholder="Ask a question..."
                 style={{ flex: 1, background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.2)', color: 'white', padding: '0.75rem', borderRadius: '2rem', outline: 'none' }}
+                aria-label="Chat input field"
               />
-              <button onClick={handleSend} className="btn btn-primary" style={{ padding: '0.75rem', borderRadius: '50%' }}><Send size={18} /></button>
+              <button 
+                onClick={handleSend} 
+                className="btn btn-primary" 
+                style={{ padding: '0.75rem', borderRadius: '50%' }}
+                aria-label="Send message"
+              >
+                <Send size={18} />
+              </button>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <AnimatePresence>
+      <Suspense fallback={<LoadingSpinner />}>
         {modalContent && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', zIndex: 100, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '2rem' }}
-            onClick={() => setModalContent('')}
-          >
-            <motion.div 
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.9 }}
-              className="glass-card"
-              style={{ maxWidth: '800px', width: '100%', maxHeight: '80vh', overflowY: 'auto', padding: '2rem', position: 'relative' }}
-              onClick={e => e.stopPropagation()}
-            >
-              <button onClick={() => setModalContent('')} style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'transparent', border: 'none', color: 'var(--text-light)', cursor: 'pointer' }}><X size={24} /></button>
-              <h2 style={{ marginBottom: '1.5rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: '0.5rem' }}>Detailed Information</h2>
-              <div style={{ lineHeight: '1.8', color: 'var(--text-light)', whiteSpace: 'pre-wrap' }}>{modalContent}</div>
-            </motion.div>
-          </motion.div>
+          <LazyWikipediaModal content={modalContent} onClose={() => setModalContent('')} />
         )}
-      </AnimatePresence>
+      </Suspense>
     </>
   );
 };
@@ -640,14 +738,20 @@ function App() {
           <header style={{ padding: '1.5rem', borderBottom: '1px solid var(--glass-border)', background: 'var(--bg-card)', backdropFilter: 'blur(10px)', position: 'sticky', top: 0, zIndex: 10 }}>
             <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 'bold', fontSize: '1.2rem' }}>
-                <img src="https://upload.wikimedia.org/wikipedia/commons/1/17/Ashoka_Chakra.svg" alt="Logo" style={{ width: '24px', height: '24px' }} />
+                <img src="https://upload.wikimedia.org/wikipedia/commons/1/17/Ashoka_Chakra.svg" alt="India Votes - Ashoka Chakra Logo" style={{ width: '24px', height: '24px' }} />
                 India Votes
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <button onClick={toggleTheme} style={{ color: 'var(--text-muted)' }} title="Toggle Theme">
+                <button onClick={toggleTheme} style={{ color: 'var(--text-muted)' }} aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}>
                   {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
                 </button>
-                <button onClick={() => setShowContent(false)} style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Back to Home</button>
+                <button 
+                  onClick={() => setShowContent(false)} 
+                  style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}
+                  aria-label="Go back to home page"
+                >
+                  Back to Home
+                </button>
               </div>
             </div>
           </header>
