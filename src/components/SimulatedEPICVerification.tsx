@@ -5,8 +5,13 @@ export const SimulatedEPICVerification = () => {
   const [epicNumber, setEpicNumber] = useState('');
   const [message, setMessage] = useState('');
 
-  const handleVerify = () => {
-    const epicRegex = /^[A-Z]{3}[0-9]{7}$/;
+  /**
+   * Validates the format of the entered EPIC (Voter ID) number using regex.
+   * Format: 3 uppercase letters followed by 7 digits (e.g., ABC1234567).
+   * @returns {void} Updates the component state with validation message.
+   */
+  const handleVerify = (): void => {
+    const epicRegex: RegExp = /^[A-Z]{3}[0-9]{7}$/;
     if (epicRegex.test(epicNumber)) {
       setMessage("Format Valid. Please verify live at voters.eci.gov.in.");
     } else {

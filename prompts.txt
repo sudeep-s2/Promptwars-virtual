@@ -12,5 +12,8 @@
 4. **Testing Prompt**:
    "Configure Vitest and React Testing Library. Generate App.test.tsx to ensure all core components (Hero, Flashcards, Forms) render correctly. Add a 'test' script to package.json."
 
-5. **Deployment Prompt**:
-   "Dockerize the application using Nginx on port 8080 and Node 20. Deploy to Google Cloud Run under project 'promptwars-virtual-494408'."
+5. **Final Efficiency & Google Services Prompt**:
+   "Refactor the app for maximum efficiency using React.lazy and Suspense for all major components. Integrate Google Firebase Analytics for user tracking. Add JSDoc documentation to all utility functions and ensure zero 'any' types in the TypeScript codebase."
+
+6. **Deployment Prompt**:
+   "Dockerize the application using Nginx on port 8080 and Node 20. Deploy to Google Cloud Run under project 'promptwars-virtual-494408' with service name 'civic-navigator'."

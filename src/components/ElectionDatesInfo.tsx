@@ -8,7 +8,19 @@ export const ElectionDatesInfo = () => {
   const [info, setInfo] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const fetchElectionDetails = async () => {
+  interface WikipediaResponse {
+    query?: {
+      pages?: Record<string, { extract?: string }>;
+      search?: Array<{ title: string }>;
+    };
+  }
+
+  /**
+   * Fetches election details from the Wikipedia API based on the selected election type and state.
+   * Performs validation for state names when in 'state' mode.
+   * @returns {Promise<void>} Resolves when the information has been fetched and updated in state.
+   */
+  const fetchElectionDetails = async (): Promise<void> => {
     setLoading(true);
     setInfo('');
     let query = electionType === 'pm' ? '2024 Indian general election' : `${stateName} Legislative Assembly election`;
@@ -23,13 +35,13 @@ export const ElectionDatesInfo = () => {
     
     try {
       const res = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&utf8=&format=json&origin=*`);
-      const data = await res.json();
-      if (data.query && data.query.search && data.query.search.length > 0) {
+      const data: WikipediaResponse = await res.json();
+      if (data.query?.search && data.query.search.length > 0) {
         const title = data.query.search[0].title;
         const detailRes = await fetch(`https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&titles=${encodeURIComponent(title)}&format=json&origin=*`);
-        const detailData = await detailRes.json();
-        const pages = detailData.query.pages as Record<string, any>;
-        const extract = Object.values(pages)[0].extract as string;
+        const detailData: WikipediaResponse = await detailRes.json();
+        const pages = detailData.query?.pages;
+        const extract = pages ? Object.values(pages)[0].extract : undefined;
         setInfo(extract || "No recent election details found.");
       } else {
         setInfo("No recent election details found.");

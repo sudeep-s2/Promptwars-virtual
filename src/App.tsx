@@ -1,18 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { Sun, Moon } from 'lucide-react';
+import { LoadingSpinner } from './components/LoadingSpinner';
 import './index.css';
 
-// Components
-import { HeroSection } from './components/HeroSection';
-import { ElectionTypes } from './components/ElectionTypes';
-import { ProcessTimeline } from './components/ProcessTimeline';
-import { DoubtSection } from './components/DoubtSection';
-import { ElectionDatesInfo } from './components/ElectionDatesInfo';
-import { CandidateKYCSearch } from './components/CandidateKYCSearch';
-import { VoterRegistrationForm } from './components/VoterRegistrationForm';
-import { QueryForm } from './components/QueryForm';
-import { Chatbot } from './components/Chatbot';
+// Components - Dynamically Imported for Performance
+const HeroSection = lazy(() => import('./components/HeroSection').then(m => ({ default: m.HeroSection })));
+const ElectionTypes = lazy(() => import('./components/ElectionTypes').then(m => ({ default: m.ElectionTypes })));
+const ProcessTimeline = lazy(() => import('./components/ProcessTimeline').then(m => ({ default: m.ProcessTimeline })));
+const DoubtSection = lazy(() => import('./components/DoubtSection').then(m => ({ default: m.DoubtSection })));
+const ElectionDatesInfo = lazy(() => import('./components/ElectionDatesInfo').then(m => ({ default: m.ElectionDatesInfo })));
+const CandidateKYCSearch = lazy(() => import('./components/CandidateKYCSearch').then(m => ({ default: m.CandidateKYCSearch })));
+const VoterRegistrationForm = lazy(() => import('./components/VoterRegistrationForm').then(m => ({ default: m.VoterRegistrationForm })));
+const QueryForm = lazy(() => import('./components/QueryForm').then(m => ({ default: m.QueryForm })));
+const Chatbot = lazy(() => import('./components/Chatbot').then(m => ({ default: m.Chatbot })));
 
 export default function App() {
   const [showContent, setShowContent] = useState(false);
@@ -28,7 +29,9 @@ export default function App() {
     <div className="app">
       <AnimatePresence mode="wait">
         {!showContent ? (
-          <HeroSection key="hero" onStart={() => setShowContent(true)} />
+          <Suspense fallback={<LoadingSpinner />}>
+            <HeroSection key="hero" onStart={() => setShowContent(true)} />
+          </Suspense>
         ) : (
           <main key="content" className="fade-in">
             {/* Navigation Header */}
@@ -53,13 +56,15 @@ export default function App() {
               </div>
             </header>
 
-            <ElectionTypes />
-            <ProcessTimeline />
-            <ElectionDatesInfo />
-            <CandidateKYCSearch />
-            <DoubtSection />
-            <VoterRegistrationForm />
-            <QueryForm />
+            <Suspense fallback={<LoadingSpinner />}>
+              <ElectionTypes />
+              <ProcessTimeline />
+              <ElectionDatesInfo />
+              <CandidateKYCSearch />
+              <DoubtSection />
+              <VoterRegistrationForm />
+              <QueryForm />
+            </Suspense>
 
             <footer style={{ padding: '3rem 1.5rem', borderTop: '1px solid var(--glass-border)', marginTop: '4rem', background: 'rgba(0,0,0,0.2)', textAlign: 'center' }}>
               <div className="container">
@@ -71,7 +76,9 @@ export default function App() {
               </div>
             </footer>
 
-            <Chatbot />
+            <Suspense fallback={null}>
+              <Chatbot />
+            </Suspense>
           </main>
         )}
       </AnimatePresence>

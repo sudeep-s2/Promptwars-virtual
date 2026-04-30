@@ -18,9 +18,10 @@ A production-grade, accessible, and high-performance React application designed 
 ### 3. Smart Integrations
 - **Gemini AI Assistant**: A chatbot powered by Google Gemini 1.5 Flash for intelligent summarization of election data.
 - **Wikipedia API**: Real-time fetching of election details for specific states or general elections.
-- **Lazy Loading**: Heavy components (like the Wikipedia Modal) are lazy-loaded to optimize performance.
+- **Lazy Loading**: 100% of major content sections are lazy-loaded using React.lazy and Suspense to minimize initial TTI.
 
-### 4. Accessibility & Quality (Hackathon Grade)
+### 4. Google Services & Quality
+- **Firebase Analytics**: Integrated Firebase SDK for real-time user engagement tracking.
 - **100% Semantic HTML**: Replaced generic divs with <main>, <section>, <header>, <footer>, <nav>, and <article>.
 - **A11y Compliant**: ARIA labels on all interactive elements, descriptive alt text for images, and high-contrast focus states.
 - **Modular Architecture**: Extracted core components into separate files with strict TypeScript interfaces.
@@ -29,6 +30,7 @@ A production-grade, accessible, and high-performance React application designed 
 ## Technology Stack
 - **Framework**: React 19 + Vite
 - **AI**: Google Generative AI (Gemini 1.5 Flash)
+- **Analytics**: Firebase Analytics
 - **Styling**: Vanilla CSS with CSS Variables
 - **Animations**: Framer Motion
 - **Icons**: Lucide React

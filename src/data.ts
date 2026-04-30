@@ -1,4 +1,39 @@
-export const indianElectionData = {
+export interface ElectionTypeInfo {
+  title: string;
+  description: string;
+  frequency: string;
+  whoVotes: string;
+  result: string;
+}
+
+export interface ElectionStep {
+  id: number;
+  title: string;
+  description: string;
+}
+
+export interface FAQ {
+  question: string;
+  answer: string;
+}
+
+export interface Candidate {
+  id: number;
+  name: string;
+  party: string;
+  constituency: string;
+  criminalCases: string;
+}
+
+export interface IndianElectionData {
+  generalElection: ElectionTypeInfo;
+  stateElection: ElectionTypeInfo;
+  steps: ElectionStep[];
+  faqs: FAQ[];
+  candidates: Candidate[];
+}
+
+export const indianElectionData: IndianElectionData = {
   generalElection: {
     title: "Lok Sabha (General) Elections",
     description: "These elections are held to choose Members of Parliament (MPs) for the lower house of the Indian Parliament. The leader of the majority party or coalition becomes the Prime Minister of India.",

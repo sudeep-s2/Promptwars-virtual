@@ -16,7 +16,19 @@ export const Chatbot = () => {
   const [messages, setMessages] = useState([{ text: "Hi! I'm your election assistant. Ask me about EVM, VVPAT, NOTA, or ECI.", sender: 'bot', fullText: '' }]);
   const [modalContent, setModalContent] = useState('');
 
-  const handleSend = async () => {
+  interface WikipediaResponse {
+    query?: {
+      pages?: Record<string, { extract?: string }>;
+      search?: Array<{ title: string }>;
+    };
+  }
+
+  /**
+   * Processes user input and generates a response using local logic or the Gemini AI model.
+   * If the query is unknown, it fetches information from the Wikipedia API and summarizes it.
+   * @returns {Promise<void>} Resolves when the message has been sent and processed.
+   */
+  const handleSend = async (): Promise<void> => {
     if (!input.trim()) return;
     const userMsg = { text: input, sender: 'user' as const, fullText: '' };
     setMessages(prev => [...prev, userMsg]);
@@ -34,14 +46,14 @@ export const Chatbot = () => {
       else if (lower.includes('eci')) reply = "ECI is the Election Commission of India, responsible for administering elections.";
       else {
         const res = await fetch(`https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(currentInput + " election India")}&utf8=&format=json&origin=*`);
-        const data = await res.json();
+        const data: WikipediaResponse = await res.json();
         
-        if (data.query && data.query.search && data.query.search.length > 0) {
+        if (data.query?.search && data.query.search.length > 0) {
           const title = data.query.search[0].title;
           const detailRes = await fetch(`https://en.wikipedia.org/w/api.php?action=query&prop=extracts&exintro=1&explaintext=1&titles=${encodeURIComponent(title)}&format=json&origin=*`);
-          const detailData = await detailRes.json();
-          const pages = detailData.query.pages as Record<string, any>;
-          const extract = Object.values(pages)[0].extract as string;
+          const detailData: WikipediaResponse = await detailRes.json();
+          const pages = detailData.query?.pages;
+          const extract = pages ? Object.values(pages)[0].extract : undefined;
           
           if (extract) {
             try {
