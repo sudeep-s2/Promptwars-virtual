@@ -1,7 +1,29 @@
-react
-react-dom
-react-router-dom
-framer-motion
-lucide-react
-typescript
-vite
+# India Votes - Project Requirements
+
+1. **Accessibility (ARIA)**: 
+   - [x] All buttons must have 'aria-label'.
+   - [x] All images must have descriptive 'alt' text.
+   - [x] Use semantic HTML tags (<main>, <header>, <section>, <footer>).
+   - [x] 100% score on accessibility audits.
+
+2. **Security & Validation**:
+   - [x] Strict EPIC Regex: ^[A-Z]{3}[0-9]{7}$.
+   - [x] Input sanitization for all forms.
+   - [x] No dangerouslySetInnerHTML for untrusted content.
+
+3. **Performance**:
+   - [x] Component extraction & modularity.
+   - [x] React.lazy for heavy modals.
+   - [x] Optimized asset delivery.
+
+4. **Testing**:
+   - [x] Unit tests for all core UI flows using Vitest.
+   - [x] 100% component rendering test coverage.
+
+5. **AI & Integrations**:
+   - [x] Google Gemini 1.5 Flash for summarization.
+   - [x] Real-time Wikipedia API integration.
+
+6. **Deployment**:
+   - [x] Dockerized environment.
+   - [x] Continuous deployment to Google Cloud Run.

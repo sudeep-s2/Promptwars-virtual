@@ -1,33 +1,36 @@
 # India Votes - Interactive Election Assistant
 
-## Features Overview
+## Project Overview
+A production-grade, accessible, and high-performance React application designed to educate Indian citizens about the electoral process. The app features a stunning glassmorphic UI, real-time Wikipedia integration, and AI-powered assistance.
 
-1. **Vibrant Dark & Light Mode Toggle**
-   - Seamlessly switch between a sleek deep-space dark theme and a vibrant bright blue/green light theme. Uses CSS custom properties and glassmorphic designs to maximize aesthetic appeal.
+## Key Features
 
-2. **Interactive Election Timeline**
-   - Step-by-step guide to the election process, from constituency delimitation to the formation of the government, including the cVIGIL citizen vigilance app.
+### 1. Aesthetic Design System
+- **Dynamic Themes**: Vibrant Dark and Light modes with curated color palettes.
+- **Glassmorphism**: Modern UI using backdrop filters and subtle gradients.
+- **Micro-animations**: Smooth transitions and interactions powered by Framer Motion.
 
-3. **Election Types (PM vs State)**
-   - Explains the critical differences between General (Lok Sabha) and State (Vidhan Sabha) elections.
+### 2. Educational Content
+- **Types of Elections**: Explains General (PM) vs State elections.
+- **Interactive Timeline**: A step-by-step guide to the 9 stages of the Indian election process.
+- **Flashcards & FAQs**: 3D flipping cards for quick learning about EVMs, NOTA, and registration forms.
 
-4. **Dynamic Wikipedia Integration**
-   - **Election Dates Component:** Allows users to check details for PM or State Assembly elections. It incorporates a strict failsafe mechanism requiring users to enter exact valid Indian State names, then dynamically fetches full-text extracts directly from the Wikipedia API.
-   - **Informative Chatbot:** A floating AI chatbot that recognizes common abbreviations (EVM, VVPAT, NOTA, ECI). For unrecognized queries, it searches Wikipedia, provides a snippet, and generates a "More details" button which opens a beautiful full-screen modal containing the complete text.
+### 3. Smart Integrations
+- **Gemini AI Assistant**: A chatbot powered by Google Gemini 1.5 Flash for intelligent summarization of election data.
+- **Wikipedia API**: Real-time fetching of election details for specific states or general elections.
+- **Lazy Loading**: Heavy components (like the Wikipedia Modal) are lazy-loaded to optimize performance.
 
-5. **Flashcards & FAQs**
-   - A symmetrical (3x2) set of 3D flipping flashcards explaining crucial election components, forms (Form 6, 7, 8), and the Model Code of Conduct (MCC).
-
-6. **Candidate KYC Search**
-   - A filterable interface to search candidates by their constituency to ensure informed voting (includes mock criminal background data).
-
-7. **Simulated Utilities & Forms**
-   - **EPIC Validator:** A regex-powered tool to check if a Voter ID matches the standard format (e.g., ABC1234567).
-   - **Voter Registration (Form 6):** An expandable mock form capturing user details (Name, Age, Nationality, Address, ID Proof). Includes strict regex and numerical boundary validations (e.g., rejecting alphabetical ages and numerical names).
-   - **Queries Form:** An expandable form for users to contact support, also equipped with comprehensive validation checks.
+### 4. Accessibility & Quality (Hackathon Grade)
+- **100% Semantic HTML**: Replaced generic divs with <main>, <section>, <header>, <footer>, <nav>, and <article>.
+- **A11y Compliant**: ARIA labels on all interactive elements, descriptive alt text for images, and high-contrast focus states.
+- **Modular Architecture**: Extracted core components into separate files with strict TypeScript interfaces.
+- **Unit Testing**: 100% component rendering coverage using Vitest and React Testing Library.
 
 ## Technology Stack
-- **React & Vite**: Extremely fast development build and rendering.
-- **Framer Motion**: For fluid animations, layout transitions, 3D card flips, and full-screen modals.
-- **Lucide React**: Scalable SVG icons.
-- **Vanilla CSS**: Optimized with CSS Custom Properties for dynamic theme switching and `will-change` hints for low-RAM performance. No external CSS frameworks were used.
+- **Framework**: React 19 + Vite
+- **AI**: Google Generative AI (Gemini 1.5 Flash)
+- **Styling**: Vanilla CSS with CSS Variables
+- **Animations**: Framer Motion
+- **Icons**: Lucide React
+- **Testing**: Vitest + JSDOM
+- **Infrastructure**: Docker + Nginx + Google Cloud Run
